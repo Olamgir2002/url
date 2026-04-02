@@ -1,15 +1,17 @@
-const express = require('express');
+import express from 'express';
+import { Request, Response } from 'express';
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const user = require('../models/user');
+import user from '../models/user';
 
-router.post('/', async (req, res) => {
+
+router.post('/', async (req: Request, res: Response) => {
     const { email, password } = req.body;
-    const existingUser = user.findByEmail(email);
+    const existingUser = await user.findByEmail(email);
     if (!existingUser) {
         return res.status(400).json({ message: 'Invalid credentials' });
     }
-    const isMatch = await bcrypt.compare(password, existingUser.password);
+    const isMatch = await bcrypt.compare(password, existingUser.password_hash);
     if (!isMatch) {
         return res.status(400).json({ message: 'Invalid credentials' });
     }
@@ -17,4 +19,4 @@ router.post('/', async (req, res) => {
     console.log(req.session.user);
     res.json({ message: 'Login successful' });
 });
-module.exports = router;
+export default router;
