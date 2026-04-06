@@ -14,3 +14,16 @@ export const shortenUrl = async (originalLink: string): Promise<ShortenResponse>
 	})
 	return data
 }
+
+export const getUserLinks = async (): Promise<ShortenResponse[]> => {
+	const { data } = await baseClient.get<ShortenResponse[]>('/links', {
+		withCredentials: true,
+	})
+	return data
+}
+
+export const deleteLink = async (id: number): Promise<void> => {
+	await baseClient.delete(`/links/${id}`, {
+		withCredentials: true,
+	})
+}

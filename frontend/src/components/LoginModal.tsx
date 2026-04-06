@@ -1,6 +1,7 @@
 import { X } from "lucide-react"
-const url = import.meta.env.VITE_API_URL;
 import { useState } from "react"
+import { toast } from "sonner"
+const url = import.meta.env.VITE_API_URL;
 
 export const LoginModal = ({ setIsSignInOpen, setUser }: { setIsSignInOpen: (isOpen: boolean) => void; setUser: (user: { email: string; username?: string }) => void }) => {
   const [email, setEmail] = useState('');
@@ -26,11 +27,10 @@ const submit = async () => {
     const data = await res.json();
 
     if (!res.ok) {
-      console.error(data.message || "Auth failed");
+      toast.error(data.message || "Auth failed");
       return;
     }
 
-    // If it’s signup, automatically login
     if (mode === "auth") {
       const loginRes = await fetch(`${url}/login`, {
         method: "POST",
@@ -40,18 +40,19 @@ const submit = async () => {
       });
       const loginData = await loginRes.json();
       if (!loginRes.ok) {
-        console.error(loginData.message || "Login after signup failed");
+        toast.error(loginData.message || "Login after signup failed");
         return;
       }
-      setUser({ email: loginData.email, username: loginData.username || loginData.full_name });
+      setUser({ email, username: loginData.username || loginData.full_name });
+      toast.success("Account created successfully!");
     } else {
-      // Direct login
-      setUser({ email: data.email, username: data.username || data.full_name });
+      setUser({ email, username: data.username || data.full_name });
+      toast.success("Signed in successfully!");
     }
 
-    setIsSignInOpen(false); // close modal after login
+    setIsSignInOpen(false);
   } catch (err) {
-    console.error("Error:", err);
+    toast.error("Something went wrong. Please try again.");
   }
 };
   return (
@@ -160,7 +161,6 @@ const submit = async () => {
           </button>
         </div>
 
-        {/* Toggle Mode */}
         <p className="mt-3 text-center text-sm text-slate-500 dark:text-slate-300/70">
           {mode === "login" ? (
             <>

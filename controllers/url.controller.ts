@@ -15,10 +15,16 @@ export const createShortLink = async (req: Request, res: Response) => {
 
     const short_link = nanoid(8);
 
-    const [link] = await db.insert(urls).values({
-      original_link,
-      short_link,
-    }).returning();
+    const user_id = (req as any).session?.user?.id ?? null;
+
+    const [link] = await db
+      .insert(urls)
+      .values({
+        original_link,
+        short_link,
+        user_id,
+      })
+      .returning();
 
     res.status(201).json(link);
   } catch (err) {
@@ -65,7 +71,8 @@ export const deleteLink = async (req: AuthRequest, res: Response) => {
   try {
     const id = Number(req.params.id);
 
-    const [deleted] = await db.delete(urls)
+    const [deleted] = await db
+      .delete(urls)
       .where(and(eq(urls.id, id), eq(urls.user_id, req.userId!)))
       .returning();
 
