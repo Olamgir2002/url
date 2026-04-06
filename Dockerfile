@@ -14,6 +14,7 @@ COPY services/ ./services/
 COPY models/ ./models/
 COPY middleware/ ./middleware/
 COPY types/ ./types/
+COPY database/ ./database/
 
 RUN npm run build
 
