@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import session from "express-session";
 import loginRoutes from "./routes/login";
 import logoutRoutes from "./routes/logout";
+import linksRoutes from "./routes/links";
 dotenv.config();
 const PORT = process.env.PORT || 3000;
 
@@ -36,6 +37,7 @@ app.get('/', (req, res) => {
 app.use('/auth', authRoutes);
 app.use('/login', loginRoutes);
 app.use('/logout', logoutRoutes);
+app.use('/links', linksRoutes);
 
 // URL routes (CRUD)
 app.use("/api/urls", urlRoutes);

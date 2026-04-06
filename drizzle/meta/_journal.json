@@ -29,6 +29,13 @@
       "when": 1775147836672,
       "tag": "0003_violet_cerise",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1775432379174,
+      "tag": "0004_drop_user_tokens",
+      "breakpoints": true
     }
   ]
 }
