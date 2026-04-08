@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { extractBearerToken, verifyAccessToken } from "../helpers/authUtils";
 import { sendError } from "../services/error-response";
 
 export interface AuthRequest extends Request {
@@ -7,8 +7,8 @@ export interface AuthRequest extends Request {
 }
 
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const header = req.headers.authorization;
-  if (!header?.startsWith("Bearer ")) {
+  const token = extractBearerToken(req.headers.authorization);
+  if (!token) {
     sendError(res, 401, "Please sign in to continue.", {
       devMessage: "Authorization header missing or malformed",
       code: "AUTH_MISSING_TOKEN",
@@ -16,32 +16,30 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
     return;
   }
 
-  const token = header.split(" ")[1]; 
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as { userId: number };
-    req.userId = payload.userId;
-    next();
-  } catch {
+  const payload = verifyAccessToken(token);
+  if (!payload) {
     sendError(res, 401, "Your session is invalid or expired. Please sign in again.", {
       devMessage: "Access token verification failed",
       code: "AUTH_INVALID_TOKEN",
     });
+    return;
   }
+
+  req.userId = payload.userId;
+  next();
 };
 
 export const optionalAuthenticate = (req: AuthRequest, _res: Response, next: NextFunction) => {
-  const header = req.headers.authorization;
-  if (!header?.startsWith("Bearer ")) {
+  const token = extractBearerToken(req.headers.authorization);
+  if (!token) {
     next();
     return;
   }
 
-  const token = header.split(" ")[1];
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as { userId: number };
+  const payload = verifyAccessToken(token);
+  if (payload) {
     req.userId = payload.userId;
-  } catch {
-    // Ignore invalid token for guest-capable endpoints.
+  } else {
     req.userId = undefined;
   }
 
