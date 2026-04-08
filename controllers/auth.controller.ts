@@ -7,6 +7,8 @@ import { users, sessions } from "../database/schema";
 import { eq } from "drizzle-orm";
 import { AuthRequest } from "../middleware/auth";
 import { getErrorMessage, sendError } from "../services/error-response";
+import { isExpired, validatePasswordOrSendError, verifyRefreshTokenOrSendError } from "../helpers/authUtils";
+
 
 const generateTokens = (userId: number) => {
   const accessToken = jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: "15m" });
@@ -97,14 +99,7 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
-    const valid = await bcrypt.compare(password, user.password_hash);
-    if (!valid) {
-      sendError(res, 401, "Invalid email or password.", {
-        devMessage: `Login failed: invalid password for userId ${user.id}`,
-        code: "AUTH_INVALID_CREDENTIALS",
-      });
-      return;
-    }
+    if (!(await validatePasswordOrSendError(res, password, user.password_hash, user.id))) return;
 
     const tokens = generateTokens(user.id);
 
@@ -134,7 +129,7 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const refresh = async (req: Request, res: Response) => {
+export const refreshAccessToken = async (req: Request, res: Response) => {
   try {
     const { refreshToken } = req.body;
     if (!refreshToken) {
@@ -145,24 +140,18 @@ export const refresh = async (req: Request, res: Response) => {
       return;
     }
 
-    let payload: { userId: number };
-    try {
-      payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!) as { userId: number };
-    } catch {
-      sendError(res, 401, "Your session is invalid. Please sign in again.", {
-        devMessage: "JWT refresh token verification failed",
-        code: "AUTH_INVALID_REFRESH_TOKEN",
-      });
+    const payload = verifyRefreshTokenOrSendError(res, refreshToken);
+    if (!payload) {
       return;
     }
 
     const session = await db.query.sessions.findFirst({
       where: eq(sessions.refresh_token, refreshToken),
     });
-    if (!session || session.expires_at < new Date()) {
-      sendError(res, 401, "Your session has expired. Please sign in again.", {
-        devMessage: "Refresh session missing or expired",
-        code: "AUTH_SESSION_EXPIRED",
+    if (!session || isExpired(session.expires_at)) {
+        sendError(res, 401, "Your session has expired. Please sign in again.", {
+          devMessage: "Refresh session missing or expired",
+          code: "AUTH_SESSION_EXPIRED",
       });
       return;
     }
