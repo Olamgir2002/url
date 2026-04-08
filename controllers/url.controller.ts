@@ -5,6 +5,7 @@ import { urls } from "../database/schema";
 import { eq, and } from "drizzle-orm";
 import { AuthRequest } from "../middleware/auth";
 import { getErrorMessage, sendError } from "../services/error-response";
+import { validateHttpUrlOrSendError } from "../helpers/urlUtils";
 
 export const createShortLink = async (req: AuthRequest, res: Response) => {
   try {
@@ -17,11 +18,7 @@ export const createShortLink = async (req: AuthRequest, res: Response) => {
       return;
     }
 
-    if (!/^https?:\/\//.test(original_link)) {
-      sendError(res, 400, "Please enter a valid URL starting with http:// or https://.", {
-        devMessage: "Invalid original_link format",
-        code: "VALIDATION_ERROR",
-      });
+    if (!validateHttpUrlOrSendError(res, original_link)) {
       return;
     }
 
