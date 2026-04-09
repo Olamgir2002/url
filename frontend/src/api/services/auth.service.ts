@@ -41,13 +41,13 @@ const saveTokens = (accessToken: string, refreshToken: string): void => {
 }
 
 export const register = async (payload: RegisterPayload): Promise<AuthResponse> => {
-	const { data } = await baseClient.post<AuthResponse>('/auth/register', payload)
+	const { data } = await baseClient.post<AuthResponse>('/api/v1/auth/register', payload)
 	saveTokens(data.accessToken, data.refreshToken)
 	return data
 }
 
 export const login = async (payload: LoginPayload): Promise<AuthResponse> => {
-	const { data } = await baseClient.post<AuthResponse>('/auth/login', payload)
+	const { data } = await baseClient.post<AuthResponse>('/api/v1/auth/login', payload)
 	saveTokens(data.accessToken, data.refreshToken)
 	return data
 }
@@ -59,7 +59,7 @@ export const refreshAuth = async (payload?: RefreshPayload): Promise<RefreshResp
 		throw new Error('No refresh token available')
 	}
 
-	const { data } = await baseClient.post<RefreshResponse>('/auth/refresh', {
+	const { data } = await baseClient.post<RefreshResponse>('/api/v1/auth/refresh', {
 		refreshToken,
 	})
 
@@ -69,13 +69,13 @@ export const refreshAuth = async (payload?: RefreshPayload): Promise<RefreshResp
 
 export const logout = async (): Promise<void> => {
 	try {
-		await baseClient.post('/auth/logout')
+		await baseClient.post('/api/v1/auth/logout')
 	} finally {
 		tokenStorage.clearTokens()
 	}
 }
 
 export const getCurrentUser = async (): Promise<AuthUser> => {
-	const { data } = await baseClient.get<CurrentUserResponse>('/auth/me')
+	const { data } = await baseClient.get<CurrentUserResponse>('/api/v1/auth/me')
 	return data.user
 }

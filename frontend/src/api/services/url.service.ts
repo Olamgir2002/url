@@ -9,21 +9,21 @@ export interface ShortenResponse {
 }
 
 export const shortenUrl = async (originalLink: string): Promise<ShortenResponse> => {
-	const { data } = await baseClient.post<ShortenResponse>('/urls', {
+	const { data } = await baseClient.post<ShortenResponse>('/api/v1/urls', {
 		originalLink,
 	})
 	return data
 }
 
 export const getUserLinks = async (): Promise<ShortenResponse[]> => {
-	const { data } = await baseClient.get<ShortenResponse[]>('/urls', {
+	const { data } = await baseClient.get<ShortenResponse[]>('/api/v1/urls', {
 		withCredentials: true,
 	})
 	return data
 }
 
 export const deleteLink = async (id: string): Promise<void> => {
-	await baseClient.delete(`/urls/${id}`, {
+	await baseClient.delete(`/api/v1/urls/${id}`, {
 		withCredentials: true,
 	})
 }
