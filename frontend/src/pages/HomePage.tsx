@@ -50,8 +50,9 @@ export const HomePage = () => {
             setShortLink("");
             try {
               const data = await shortenUrl(inputUrl.trim());
-              setShortLink(`${API_BASE_URL}/${data.short_link}`);
+              setShortLink(`${API_BASE_URL}/${data.shortLink}`);
               toast.success("URL shortened successfully!");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } catch (err: any) {
               const msg = err.response?.data?.error || "Something went wrong";
               setError(msg);

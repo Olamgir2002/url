@@ -12,12 +12,12 @@ export const LoginModal = ({ setIsSignInOpen, setUser }: { setIsSignInOpen: (isO
 const submit = async () => {
   try {
     if (mode === "register") {
-      const data = await register({ email, password, full_name: fullName });
-      setUser({ email: data.user.email, username: data.user.full_name ?? undefined });
+      const data = await register({ email, password, fullName });
+      setUser({ email: data.user.email, username: data.user.fullName ?? undefined });
       toast.success("Account created successfully!");
     } else {
       const data = await login({ email, password });
-      setUser({ email: data.user.email, username: data.user.full_name ?? undefined });
+      setUser({ email: data.user.email, username: data.user.fullName ?? undefined });
       toast.success("Signed in successfully!");
     }
 

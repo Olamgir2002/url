@@ -46,7 +46,7 @@ function App() {
         if (isMounted) {
           setUser({
             email: currentUser.email,
-            username: currentUser.full_name ?? undefined,
+            username: currentUser.fullName ?? undefined,
           });
         }
       } catch {

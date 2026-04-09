@@ -9,27 +9,27 @@ import { validateHttpUrlOrSendError } from "../helpers/urlUtils";
 
 export const createShortLink = async (req: AuthRequest, res: Response) => {
   try {
-    const { original_link } = req.body;
-    if (!original_link) {
+    const { originalLink } = req.body;
+    if (!originalLink) {
       sendError(res, 400, "Please provide a URL to shorten.", {
-        devMessage: "Missing required field: original_link",
+        devMessage: "Missing required field: originalLink",
         code: "VALIDATION_ERROR",
       });
       return;
     }
 
-    if (!validateHttpUrlOrSendError(res, original_link)) {
+    if (!validateHttpUrlOrSendError(res, originalLink)) {
       return;
     }
 
-    const short_link = nanoid(8);
+    const shortLink = nanoid(8);
 
     const [link] = await db
       .insert(urls)
       .values({
-        original_link,
-        short_link,
-        user_id: req.userId ?? null,
+        originalLink,
+        shortLink,
+        userId: req.userId ?? null,
       })
       .returning();
 
@@ -46,8 +46,8 @@ export const createShortLink = async (req: AuthRequest, res: Response) => {
 export const getUserLinks = async (req: AuthRequest, res: Response) => {
   try {
     const links = await db.query.urls.findMany({
-      where: eq(urls.user_id, req.userId!),
-      orderBy: (urls, { desc }) => [desc(urls.created_at)],
+      where: eq(urls.userId, req.userId!),
+      orderBy: (urls, { desc }) => [desc(urls.createdAt)],
     });
 
     res.json(links);
@@ -65,7 +65,7 @@ export const redirect = async (req: Request, res: Response) => {
     const shortLink = req.params.shortLink as string;
 
     const link = await db.query.urls.findFirst({
-      where: (urls, { eq }) => eq(urls.short_link, shortLink),
+      where: (urls, { eq }) => eq(urls.shortLink, shortLink),
     });
 
     if (!link) {
@@ -76,7 +76,7 @@ export const redirect = async (req: Request, res: Response) => {
       return;
     }
 
-    res.redirect(link.original_link);
+    res.redirect(link.originalLink);
   } catch (err) {
     console.error(err);
     sendError(res, 500, "Unable to open that link right now.", {
@@ -88,11 +88,11 @@ export const redirect = async (req: Request, res: Response) => {
 
 export const deleteLink = async (req: AuthRequest, res: Response) => {
   try {
-    const id = Number(req.params.id);
+    const id = req.params.id as string;
 
     const [deleted] = await db
       .delete(urls)
-      .where(and(eq(urls.id, id), eq(urls.user_id, req.userId!)))
+      .where(and(eq(urls.id, id), eq(urls.userId, req.userId!)))
       .returning();
 
     if (!deleted) {

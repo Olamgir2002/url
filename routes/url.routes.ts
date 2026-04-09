@@ -17,9 +17,9 @@ const router = Router();
  *         application/json:
  *           schema:
  *             type: object
- *             required: [original_link]
+ *             required: [originalLink]
  *             properties:
- *               original_link:
+ *               originalLink:
  *                 type: string
  *                 format: uri
  *     responses:

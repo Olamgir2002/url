@@ -22,10 +22,10 @@ const generateTokens = (userId: number) => {
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { email, full_name, password } = req.body;
-    if (!email || !full_name || !password) {
+    const { email, fullName, password } = req.body;
+    if (!email || !fullName || !password) {
       sendError(res, 400, "Please provide email, full name, and password.", {
-        devMessage: "Missing one or more required fields: email, full_name, password",
+        devMessage: "Missing one or more required fields: email, fullName, password",
         code: "VALIDATION_ERROR",
       });
       return;
@@ -40,33 +40,33 @@ export const register = async (req: Request, res: Response) => {
       return;
     }
 
-    const password_hash = await bcrypt.hash(password, 10);
+    const passwordHash = await bcrypt.hash(password, 10);
     const { accessToken, refreshToken } = generateTokens(0); // temp id
 
     const [user] = await db.insert(users).values({
       email,
-      full_name,
-      password_hash,
-      access_token: accessToken,
-      refresh_token: refreshToken,
+      fullName,
+      passwordHash,
+      accessToken,
+      refreshToken,
     }).returning();
 
     const tokens = generateTokens(user.id);
 
     await db.update(users).set({
-      access_token: tokens.accessToken,
-      refresh_token: tokens.refreshToken,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     }).where(eq(users.id, user.id));
 
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await db.insert(sessions).values({
-      user_id: user.id,
-      refresh_token: tokens.refreshToken,
-      expires_at: expiresAt,
+      userId: user.id,
+      refreshToken: tokens.refreshToken,
+      expiresAt,
     });
 
     res.status(201).json({
-      user: { id: user.id, email: user.email, full_name: user.full_name },
+      user: { id: user.id, email: user.email, fullName: user.fullName },
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     });
@@ -99,24 +99,24 @@ export const login = async (req: Request, res: Response) => {
       return;
     }
 
-    if (!(await validatePasswordOrSendError(res, password, user.password_hash, user.id))) return;
+    if (!(await validatePasswordOrSendError(res, password, user.passwordHash, user.id))) return;
 
     const tokens = generateTokens(user.id);
 
     await db.update(users).set({
-      access_token: tokens.accessToken,
-      refresh_token: tokens.refreshToken,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     }).where(eq(users.id, user.id));
 
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await db.insert(sessions).values({
-      user_id: user.id,
-      refresh_token: tokens.refreshToken,
-      expires_at: expiresAt,
+      userId: user.id,
+      refreshToken: tokens.refreshToken,
+      expiresAt,
     });
 
     res.json({
-      user: { id: user.id, email: user.email, full_name: user.full_name },
+      user: { id: user.id, email: user.email, fullName: user.fullName },
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     });
@@ -146,9 +146,9 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
     }
 
     const session = await db.query.sessions.findFirst({
-      where: eq(sessions.refresh_token, refreshToken),
+      where: eq(sessions.refreshToken, refreshToken),
     });
-    if (!session || isExpired(session.expires_at)) {
+    if (!session || isExpired(session.expiresAt)) {
         sendError(res, 401, "Your session has expired. Please sign in again.", {
           devMessage: "Refresh session missing or expired",
           code: "AUTH_SESSION_EXPIRED",
@@ -156,21 +156,21 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
       return;
     }
 
-  
+
     await db.delete(sessions).where(eq(sessions.id, session.id));
 
     const tokens = generateTokens(payload.userId);
 
     await db.update(users).set({
-      access_token: tokens.accessToken,
-      refresh_token: tokens.refreshToken,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     }).where(eq(users.id, payload.userId));
 
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await db.insert(sessions).values({
-      user_id: payload.userId,
-      refresh_token: tokens.refreshToken,
-      expires_at: expiresAt,
+      userId: payload.userId,
+      refreshToken: tokens.refreshToken,
+      expiresAt,
     });
 
     res.json({
@@ -191,7 +191,7 @@ export const logout = async (req: AuthRequest, res: Response) => {
     const header = req.headers.authorization;
     const token = header?.split(" ")[1];
     if (token && req.userId) {
-      await db.delete(sessions).where(eq(sessions.user_id, req.userId));
+      await db.delete(sessions).where(eq(sessions.userId, req.userId));
     }
     res.json({ message: "Logged out" });
   } catch (err) {
@@ -230,7 +230,7 @@ export const me = async (req: AuthRequest, res: Response) => {
       user: {
         id: user.id,
         email: user.email,
-        full_name: user.full_name,
+        fullName: user.fullName,
       },
     });
   } catch (err) {

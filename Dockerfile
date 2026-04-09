@@ -7,12 +7,14 @@ RUN npm install
 
 COPY tsconfig.server.json ./
 COPY server.ts ./
+COPY app.ts ./
 COPY config/ ./config/
 COPY controllers/ ./controllers/
 COPY routes/ ./routes/
 COPY services/ ./services/
 COPY models/ ./models/
 COPY middleware/ ./middleware/
+COPY helpers/ ./helpers/
 COPY types/ ./types/
 COPY database/ ./database/
 

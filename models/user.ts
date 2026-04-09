@@ -1,4 +1,4 @@
-import { db } from "../database/index";       
+import { db } from "../database/index";
 import { users } from "../database/schema";
 import { eq } from "drizzle-orm";
 
@@ -6,20 +6,20 @@ import { eq } from "drizzle-orm";
 export default class User {
     id: number;
     email: string;
-    full_name: string | null;
-    password_hash: string;
-    created_at: Date;
-    constructor(id: number, email: string, full_name: string | null, password_hash: string, created_at: Date) {
+    fullName: string | null;
+    passwordHash: string;
+    createdAt: Date;
+    constructor(id: number, email: string, fullName: string | null, passwordHash: string, createdAt: Date) {
         this.id = id;
         this.email = email;
-        this.full_name = full_name;
-        this.password_hash = password_hash;
-        this.created_at = created_at;
+        this.fullName = fullName;
+        this.passwordHash = passwordHash;
+        this.createdAt = createdAt;
     }
    static async createUser(userData: {
     email: string;
-    full_name?: string;
-    password_hash: string;
+    fullName?: string;
+    passwordHash: string;
   }): Promise<User> {
     const [newUser] = await db
       .insert(users)
@@ -29,9 +29,9 @@ export default class User {
     return new User(
       newUser.id,
       newUser.email,
-      newUser.full_name,
-      newUser.password_hash,
-      newUser.created_at
+      newUser.fullName,
+      newUser.passwordHash,
+      newUser.createdAt
     );
   }
   static async findByEmail(email: string): Promise<User | null> {
@@ -41,9 +41,9 @@ export default class User {
     return new User(
       userRow.id,
       userRow.email,
-      userRow.full_name,
-      userRow.password_hash,
-      userRow.created_at
+      userRow.fullName,
+      userRow.passwordHash,
+      userRow.createdAt
     );
   }
 }

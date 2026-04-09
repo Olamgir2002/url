@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { register, login, refresh, logout, me } from "../controllers/auth.controller";
+import { register, login, refreshAccessToken, logout, me } from "../controllers/auth.controller";
 import { authenticate } from "../middleware/auth";
 
 const router = Router();
@@ -68,7 +68,7 @@ router.post("/login", login);
  *       200:
  *         description: Token refreshed
  */
-router.post("/refresh", refresh);
+router.post("/refresh", refreshAccessToken);
 
 /**
  * @openapi
