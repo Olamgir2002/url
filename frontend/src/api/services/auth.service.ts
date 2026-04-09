@@ -3,13 +3,13 @@ import { baseClient, tokenStorage } from '../baseClient'
 export interface AuthUser {
 	id: number
 	email: string
-	full_name?: string | null
+	fullName?: string | null
 }
 
 export interface RegisterPayload {
 	email: string
 	password: string
-	full_name: string
+	fullName: string
 }
 
 export interface LoginPayload {
@@ -41,13 +41,13 @@ const saveTokens = (accessToken: string, refreshToken: string): void => {
 }
 
 export const register = async (payload: RegisterPayload): Promise<AuthResponse> => {
-	const { data } = await baseClient.post<AuthResponse>('/api/auth/register', payload)
+	const { data } = await baseClient.post<AuthResponse>('/auth/register', payload)
 	saveTokens(data.accessToken, data.refreshToken)
 	return data
 }
 
 export const login = async (payload: LoginPayload): Promise<AuthResponse> => {
-	const { data } = await baseClient.post<AuthResponse>('/api/auth/login', payload)
+	const { data } = await baseClient.post<AuthResponse>('/auth/login', payload)
 	saveTokens(data.accessToken, data.refreshToken)
 	return data
 }
@@ -59,7 +59,7 @@ export const refreshAuth = async (payload?: RefreshPayload): Promise<RefreshResp
 		throw new Error('No refresh token available')
 	}
 
-	const { data } = await baseClient.post<RefreshResponse>('/api/auth/refresh', {
+	const { data } = await baseClient.post<RefreshResponse>('/auth/refresh', {
 		refreshToken,
 	})
 
@@ -69,13 +69,13 @@ export const refreshAuth = async (payload?: RefreshPayload): Promise<RefreshResp
 
 export const logout = async (): Promise<void> => {
 	try {
-		await baseClient.post('/api/auth/logout')
+		await baseClient.post('/auth/logout')
 	} finally {
 		tokenStorage.clearTokens()
 	}
 }
 
 export const getCurrentUser = async (): Promise<AuthUser> => {
-	const { data } = await baseClient.get<CurrentUserResponse>('/api/auth/me')
+	const { data } = await baseClient.get<CurrentUserResponse>('/auth/me')
 	return data.user
 }

@@ -5,17 +5,17 @@ import { getUserLinks, deleteLink } from "../api/services/url.service";
 import { API_BASE_URL } from "../api/baseClient";
 
 interface Link {
-  id: number;
-  user_id: number;
-  original_link: string;
-  short_link: string;
-  created_at: string;
+  id: string;
+  userId: number | null;
+  originalLink: string;
+  shortLink: string;
+  createdAt: string;
 }
 
 export const Profile = ({ user }: { user: { email: string; username?: string } }) => {
   const [links, setLinks] = useState<Link[]>([]);
   const [loading, setLoading] = useState(true);
-  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
     getUserLinks()
@@ -24,7 +24,7 @@ export const Profile = ({ user }: { user: { email: string; username?: string } }
       .finally(() => setLoading(false));
   }, []);
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
       await deleteLink(id);
       setLinks((prev) => prev.filter((l) => l.id !== id));
@@ -34,7 +34,7 @@ export const Profile = ({ user }: { user: { email: string; username?: string } }
     }
   };
 
-  const handleCopy = async (shortLink: string, id: number) => {
+  const handleCopy = async (shortLink: string, id: string) => {
     await navigator.clipboard.writeText(`${API_BASE_URL}/${shortLink}`);
     toast.success("Copied to clipboard!");
     setCopiedId(id);
@@ -69,26 +69,26 @@ export const Profile = ({ user }: { user: { email: string; username?: string } }
             >
               <div className="min-w-0 flex-1">
                 <a
-                  href={`${API_BASE_URL}/${link.short_link}`}
+                  href={`${API_BASE_URL}/${link.shortLink}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 text-base font-medium text-indigo-600 hover:underline dark:text-indigo-400"
                 >
-                  {API_BASE_URL}/{link.short_link}
+                  {API_BASE_URL}/{link.shortLink}
                   <ExternalLink size={14} />
                 </a>
                 <p className="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">
-                  {link.original_link}
+                  {link.originalLink}
                 </p>
                 <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
-                  {new Date(link.created_at).toLocaleDateString()}
+                  {new Date(link.createdAt).toLocaleDateString()}
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => handleCopy(link.short_link, link.id)}
+                  onClick={() => handleCopy(link.shortLink, link.id)}
                   className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/10"
                   title="Copy link"
                 >
