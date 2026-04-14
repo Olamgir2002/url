@@ -6,19 +6,19 @@ import { eq } from "drizzle-orm";
 export default class User {
     id: number;
     email: string;
-    full_name: string | null;
+    fullName: string | null;
     password_hash: string;
     created_at: Date;
-    constructor(id: number, email: string, full_name: string | null, password_hash: string, created_at: Date) {
+    constructor(id: number, email: string, fullName: string | null, password_hash: string, created_at: Date) {
         this.id = id;
         this.email = email;
-        this.full_name = full_name;
+        this.fullName = fullName;
         this.password_hash = password_hash;
         this.created_at = created_at;
     }
    static async createUser(userData: {
     email: string;
-    full_name?: string;
+    fullName?: string;
     password_hash: string;
   }): Promise<User> {
     const [newUser] = await db
