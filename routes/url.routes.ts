@@ -1,8 +1,8 @@
-import { Router } from "express";
-import { createShortLink, getUserLinks, deleteLink } from "../controllers/url.controller";
-import { authenticate } from "../middleware/auth";
+import { Router } from 'express'
+import { createShortLink, getUserLinks, deleteLink } from '../controllers/url.controller'
+import { isAuthenticated } from '../middleware/isAuthenticated'
 
-const router = Router();
+const router = Router()
 
 /**
  * @openapi
@@ -28,7 +28,7 @@ const router = Router();
  *       201:
  *         description: Short link created
  */
-router.post("/", createShortLink);
+router.post('/', createShortLink)
 
 /**
  * @openapi
@@ -43,7 +43,7 @@ router.post("/", createShortLink);
  *       200:
  *         description: User links list
  */
-router.get("/", authenticate, getUserLinks);
+router.get('/', isAuthenticated, getUserLinks)
 
 /**
  * @openapi
@@ -64,6 +64,6 @@ router.get("/", authenticate, getUserLinks);
  *       200:
  *         description: Link deleted
  */
-router.delete("/:id", authenticate, deleteLink);
+router.delete('/:id', isAuthenticated, deleteLink)
 
-export default router;
+export default router

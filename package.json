@@ -9,7 +9,8 @@
     "dev:ts": "nodemon --watch . --ext ts,json --exec tsx server.ts",
     "typecheck": "tsc -p tsconfig.server.json --noEmit",
     "build": "tsc -p tsconfig.server.json",
-    "start": "nodemon server.ts"
+    "start": "nodemon server.ts",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "",
@@ -40,6 +41,7 @@
     "@types/swagger-ui-express": "^4.1.8",
     "drizzle-kit": "^0.31.10",
     "nodemon": "^3.1.14",
+    "prettier": "^3.8.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
